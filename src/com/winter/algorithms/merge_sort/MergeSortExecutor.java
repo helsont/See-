@@ -1,25 +1,22 @@
 package com.winter.algorithms.merge_sort;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Comparator;
 
 import com.winter.algorithms.core.AlgorithmController.VisualHang;
-import com.winter.algorithms.core.AlgorithmFrame;
 import com.winter.algorithms.core.AlgorithmExecutor;
-import com.winter.algorithms.core.AlgorithmState;
+import com.winter.algorithms.core.AlgorithmFrame;
 
 /**
  * This runnable executes a sort algorithm. When two elements are compared, the
  * algorithm pauses and updates a panel.
  */
-public class SorterThread implements AlgorithmExecutor {
+public class MergeSortExecutor implements AlgorithmExecutor {
 
 	private Double[] values;
-	private ArrayComponent panel;
-	private BlockingQueue<AlgorithmState> queue;
-	private int delay = 100;
+	private MergeSortComponent panel;
+	private VisualHang hang;
 
-	public SorterThread(Double[] values, ArrayComponent panel) {
+	public MergeSortExecutor(Double[] values, MergeSortComponent panel) {
 		this.values = values;
 		this.panel = panel;
 	}
@@ -41,7 +38,7 @@ public class SorterThread implements AlgorithmExecutor {
 		values = new Double[30];
 		for (int i = 0; i < values.length; i++)
 			values[i] = Math.random()
-					* (AlgorithmFrame.DEFAULT_FRAME_HEIGHT - 50);
+					* (AlgorithmFrame.getDefaultFrameHeight() - 50);
 		panel.setValues(new Values(values, null, null));
 	}
 
@@ -49,48 +46,32 @@ public class SorterThread implements AlgorithmExecutor {
 	public void runAlgorithm() {
 		Comparator<Double> comp = new Comparator<Double>() {
 			public int compare(Double d1, Double d2) {
-				try {
-					// Block the thread until the user either clicks
-					// 'Step' or 'Run'
-					AlgorithmState command = queue.take();
-					if (command == AlgorithmState.RUN) {
-						Thread.sleep(delay);
-						if (AlgorithmState.STEP != queue.peek())
-							queue.add(AlgorithmState.RUN);
-					}
-				} catch (InterruptedException exception) {
-					Thread.currentThread().interrupt();
-				}
-				panel.setValues(new Values(values, d1, d2));
+				hang.hang(new Values(values, d1, d2));
 				return d1.compareTo(d2);
 			}
 		};
 		MergeSorter.sort(values, comp);
-		panel.setValues(new Values(values, null, null));
 	}
 
 	@Override
 	public void setHang(VisualHang hang) {
-		// TODO Auto-generated method stub
-
+		this.hang = hang;
 	}
 
 	@Override
 	public void updateComponent(Object values) {
-		// TODO Auto-generated method stub
-
+		panel.setValues(new Values(((Values) values).values,
+				((Values) values).marked1, ((Values) values).marked2));
 	}
 
 	@Override
 	public void updateComponentEnded() {
-		// TODO Auto-generated method stub
-
+		panel.setValues(new Values(values, null, null));
 	}
 
 	@Override
 	public void updateComponentStarted() {
-		// TODO Auto-generated method stub
-
+		// Can leave empty
 	}
 
 }

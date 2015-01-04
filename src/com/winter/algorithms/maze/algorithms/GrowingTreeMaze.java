@@ -46,9 +46,10 @@ public class GrowingTreeMaze extends AbstractMazeGenerator {
 	 *            Height of the maze
 	 */
 	public GrowingTreeMaze(int width, int height) {
-		super("Growing Tree", width, height);
+		super("Growing Tree Maze", width, height);
 		list = new LinkedList<Cell>();
-		parameter = Parameters.NEWEST;
+		// Get first Parameter.
+		parameter = Parameters.values()[0];
 		init();
 	}
 
@@ -68,12 +69,9 @@ public class GrowingTreeMaze extends AbstractMazeGenerator {
 		parameter = type;
 	}
 
-	private int hangtimes = 0;
-
 	private void recurse(int idx, Cell maze[][], int x, int y, int n,
 			int visited) {
 		int directions = 4;
-		System.out.println("Hang times=" + (++hangtimes));
 		hang.hang(null);
 		if (visited < n) {
 			int neighbour_valid = -1;
@@ -227,10 +225,17 @@ public class GrowingTreeMaze extends AbstractMazeGenerator {
 
 	@Override
 	public Cell[][] generate() {
-		System.out.println("Generating maze");
 		int indeks = 0;
 		list.add(maze[1][1]);
 		recurse(indeks, maze, 1, 1, (size_col - 1) / 2 * (size_row - 1) / 2, 1);
 		return maze;
+	}
+
+	public Parameters getParameter() {
+		return parameter;
+	}
+
+	public void setParameter(Parameters parameter) {
+		this.parameter = parameter;
 	}
 }

@@ -1,7 +1,8 @@
 package com.winter.algorithms.core;
 
-import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import javax.swing.JOptionPane;
 
 /**
  * Ease of use class that automatically takes care of blocking the Thread when
@@ -61,6 +62,7 @@ public class AlgorithmController implements Runnable {
 	 * interaction.
 	 */
 	public void run() {
+		System.out.println("Just starting a new algorithm");
 		runner.reset();
 
 		hang = new VisualHang() {
@@ -85,7 +87,6 @@ public class AlgorithmController implements Runnable {
 						if (queue.peek() != AlgorithmState.STEP)
 							queue.add(AlgorithmState.RUN);
 					} else if (command == AlgorithmState.END) {
-						System.out.println("AlgorithmState.END recieved.");
 						// Exit the algorithm
 						exit = true;
 						throw new AlgorithmExitException(
@@ -111,7 +112,14 @@ public class AlgorithmController implements Runnable {
 			// This is to be expected when
 			// AlgorithmController.stop() is invoked.
 			exit = false;
-			runner.reset();
+		} catch (Throwable ex) {
+			if (AlgorithmFrame.PRODUCTION_MODE)
+				JOptionPane.showConfirmDialog(null, "An error has occured:"
+						+ ex.getLocalizedMessage(), "Oops!",
+						JOptionPane.CLOSED_OPTION);
+			else
+				ex.printStackTrace();
+			stop();
 		}
 		isRunning = false;
 		runner.updateComponentEnded();

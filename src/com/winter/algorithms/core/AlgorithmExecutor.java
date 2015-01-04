@@ -11,11 +11,6 @@ import com.winter.algorithms.core.AlgorithmController.VisualHang;
 public interface AlgorithmExecutor {
 
 	/**
-	 * Reinitializes the values of the algorithm to start fresh.
-	 */
-	public void reset();
-
-	/**
 	 * Call the method to run your algorithm, like MergeSort.sort().
 	 */
 	public void runAlgorithm();
@@ -90,5 +85,10 @@ public interface AlgorithmExecutor {
 	 * 
 	 */
 	public abstract void updateComponentStarted();
+
+	/**
+	 * Reinitializes the values of the algorithm to start fresh.
+	 */
+	public void reset();
 
 }

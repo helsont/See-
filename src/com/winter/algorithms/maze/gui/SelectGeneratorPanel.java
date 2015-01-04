@@ -15,13 +15,15 @@ import java.text.ParseException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -30,6 +32,7 @@ import com.winter.algorithms.maze.AbstractMazeGenerator;
 import com.winter.algorithms.maze.algorithms.DepthFirstMaze;
 import com.winter.algorithms.maze.algorithms.DivisionMaze;
 import com.winter.algorithms.maze.algorithms.GrowingTreeMaze;
+import com.winter.algorithms.maze.algorithms.GrowingTreeMaze.Parameters;
 import com.winter.algorithms.maze.algorithms.HuntAndKillMaze;
 
 public class SelectGeneratorPanel extends JPanel {
@@ -55,10 +58,9 @@ public class SelectGeneratorPanel extends JPanel {
 		setBorder(BorderFactory.createLineBorder(Color.black));
 		String[] dat = new String[types.length];
 		for (int i = 0; i < dat.length; i++) {
-			dat[i] = types[i].getClass().getSimpleName();
+			dat[i] = types[i].getType();
 		}
-		final JList<String> list = new JList<String>(dat); // data has type
-															// Object[]
+		final JList<String> list = new JList<String>(dat);
 		list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		list.setLayoutOrientation(JList.VERTICAL);
 		list.setVisibleRowCount(-1);
@@ -148,7 +150,6 @@ public class SelectGeneratorPanel extends JPanel {
 				try {
 					height.commitEdit();
 				} catch (ParseException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				if (height.getValue() == null) {
@@ -160,11 +161,7 @@ public class SelectGeneratorPanel extends JPanel {
 		});
 		height.setColumns(3);
 		add(height);
-		final JLabel error = new JLabel();
-		error.setVisible(false);
-		error.setForeground(Color.red);
-		error.setText("<html>");
-		error.setMaximumSize(new Dimension(130, 450));
+		final ErrorText err = new ErrorText();
 		JButton button = new JButton(">");
 		button.addActionListener(new ActionListener() {
 
@@ -174,29 +171,64 @@ public class SelectGeneratorPanel extends JPanel {
 					int w = Integer.parseInt((String) width.getValue());
 					int h = Integer.parseInt((String) height.getValue());
 					if (w % 2 == 0 || h % 2 == 0) {
-						error.setText("Only odd numbers<br>can be used.</html>");
-						error.setVisible(true);
+						err.setText("Only odd numbers can be used.");
 					} else if (w < 3 || h < 3) {
-						error.setText("Must specify values<br>greater than 3.</html>");
-						error.setVisible(true);
+						err.setText("Must specify values greater than 3.");
 					} else {
-						error.setVisible(false);
 						createMaze(list.getSelectedIndex(), w, h);
 					}
 				} catch (NumberFormatException ex) {
-					error.setText("Whole numbers<br> please.</html>");
-					error.setVisible(true);
+					err.setText("Whole numbers please.");
 
 				}
 
 			}
 		});
 		add(button);
-		add(error);
+		add(err.getErr());
 		setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+		validate();
 	}
 
-	// private int timesChanged = 0;
+	private class ErrorText implements ActionListener {
+		private JTextArea err;
+		private int visible;
+		private int MAX_VISIBLE = 5000;
+		private Timer t;
+
+		public JTextArea getErr() {
+			return err;
+		}
+
+		public ErrorText() {
+			err = new JTextArea();
+			err.setLineWrap(true);
+			err.setWrapStyleWord(true);
+			err.setVisible(false);
+			err.setForeground(Color.red);
+			err.setBackground(new Color(237, 237, 237));
+			err.setMaximumSize(new Dimension(150, 150));
+			t = new Timer(1, this);
+		}
+
+		public void setText(String text) {
+			err.setText(text);
+			err.setVisible(true);
+			visible = 0;
+			t.start();
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (visible < MAX_VISIBLE)
+				visible++;
+			else {
+				visible = 0;
+				err.setVisible(false);
+			}
+		}
+
+	}
 
 	private void setMaze(int selectedIndex) {
 		int currW = maze.size_col;
@@ -204,15 +236,63 @@ public class SelectGeneratorPanel extends JPanel {
 		createMaze(selectedIndex, currW, currH);
 	}
 
-	private void createMaze(int i, int width, int height) {
-		maze = types[i];
+	private int getCurrentMazeType() {
+		for (int i = 0; i < types.length; i++) {
+			if (types[i].getType().equals(maze.getType())) {
+				return i;
+			}
+		}
+		return 1;
+	}
 
+	private void createMaze(int i, int width, int height) {
+		if (i == -1) {
+			i = getCurrentMazeType();
+		} else
+			maze = types[i];
+		if (maze.getType().equals("Growing Tree Maze")) {
+			createDropDown();
+		} else if (petList != null)
+			petList.setVisible(false);
 		maze.size_col = width;
 		maze.size_row = height;
 		maze.resize(width, height);
 		thread.setGenerator(maze);
 		panel.repaint();
 		AlgorithmFrame.changeExecutor(new MazeThread(maze, panel, maze.maze));
+	}
+
+	private void createMaze(int i, Parameters p) {
+		if (i == -1) {
+			i = getCurrentMazeType();
+		} else
+			maze = types[i];
+		((GrowingTreeMaze) maze).setParameter(p);
+		thread.setGenerator(maze);
+		panel.repaint();
+		AlgorithmFrame.changeExecutor(new MazeThread(maze, panel, maze.maze));
+	}
+
+	private JComboBox<Parameters> petList;
+
+	private void createDropDown() {
+		Parameters[] params = GrowingTreeMaze.Parameters.values();
+		// Create the combo box, select item at index 4.
+		// Indices start at 0, so 4 specifies the pig.
+		petList = new JComboBox<Parameters>(params);
+		petList.setSelectedIndex(0);
+		petList.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				createMaze(getCurrentMazeType(),
+						(Parameters) petList.getSelectedItem());
+			}
+		});
+		add(petList);
+
+		petList.setPreferredSize(new Dimension(120, 300));
+		validate();
 	}
 
 	@Override

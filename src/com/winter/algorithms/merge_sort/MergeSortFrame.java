@@ -2,13 +2,14 @@ package com.winter.algorithms.merge_sort;
 
 import com.winter.algorithms.core.AlgorithmFrame;
 
-public class MergeSorterFrame {
+public class MergeSortFrame {
 	public static void main(String[] args) {
-		ArrayComponent panel = new ArrayComponent();
+		MergeSortComponent panel = new MergeSortComponent();
 		Double[] values = new Double[VALUES_LENGTH];
 		for (int i = 0; i < values.length; i++)
-			values[i] = Math.random() * (AlgorithmFrame.DEFAULT_FRAME_HEIGHT- 50);
-		final SorterThread sorter = new SorterThread(values, panel);
+			values[i] = Math.random()
+					* (AlgorithmFrame.getDefaultFrameHeight() - 50);
+		final MergeSortExecutor sorter = new MergeSortExecutor(values, panel);
 
 		new AlgorithmFrame(panel, sorter);
 	}

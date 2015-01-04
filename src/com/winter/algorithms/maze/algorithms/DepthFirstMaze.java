@@ -33,7 +33,7 @@ import com.winter.algorithms.maze.Cell;
 public class DepthFirstMaze extends AbstractMazeGenerator {
 
 	public DepthFirstMaze(int width, int height) {
-		super("Depth First", width, height);
+		super("Depth First Maze", width, height);
 	}
 
 	public void maze_generator(int indeks, Cell maze[][], int backtrack_x[],

@@ -49,6 +49,10 @@ public class AlgorithmThread implements Runnable {
 	 * Always true. Keep the thread alive.
 	 */
 	private boolean running;
+	/**
+	 * If the algorithm was interrupted prematurely.
+	 */
+	private boolean interrupted;
 
 	/**
 	 * Creates an AlgorithmThread based on the AlgorithmRunner to run.
@@ -101,9 +105,12 @@ public class AlgorithmThread implements Runnable {
 				AlgorithmExecutor currentAlgorithm = executorQueue.take();
 				current = currentAlgorithm;
 				runAlgorithm(currentAlgorithm);
-				if (onCompletion != null) {
+				if (onCompletion != null && !interrupted) {
 					onCompletion.onComplete();
 				}
+				// Reset the flag
+				if (interrupted)
+					interrupted = false;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -177,6 +184,7 @@ public class AlgorithmThread implements Runnable {
 	 * Stops the current AlgorithmExecutor from running.
 	 */
 	public void stop() {
+		interrupted = true;
 		controller.stop();
 	}
 

@@ -24,8 +24,6 @@ import com.winter.algorithms.maze.AbstractMazeGenerator;
 import com.winter.algorithms.maze.Cell;
 import com.winter.algorithms.maze.algorithms.DivisionMaze;
 
-
-
 public class MazeComponent extends JComponent implements AlgorithmComponent {
 	private Cell[][] maze;
 	private static final long serialVersionUID = 1L;
@@ -35,6 +33,11 @@ public class MazeComponent extends JComponent implements AlgorithmComponent {
 	public boolean showExtra;
 	private static final int PREFERRED_WIDTH = 450, PREFERRED_HEIGHT = 450;
 	private Cell current;
+	private static final Color TRANS_RED = new Color(255, 0, 56, 240),
+			TRANS_WHITE = new Color(255, 255, 255, 100),
+			TRANS_BLACK = new Color(255, 255, 255, 240),
+			TRANS_YELLOW = new Color(255, 255, 153, 150),
+			TRANS_BLUE = new Color(17, 80, 147, 150);
 
 	public MazeComponent() {
 		setBorder(BorderFactory.createLineBorder(Color.black));
@@ -113,19 +116,19 @@ public class MazeComponent extends JComponent implements AlgorithmComponent {
 		}
 
 		if (current != null) {
+			int x1 = current.x;
+			int y1 = current.y;
+
+			// This could be one line instead of a for loop
 			for (int x = 0; x < maze.length; x++) {
-				for (int y = 0; y < maze[0].length; y++) {
-					if (y == current.y) {
-						g.setColor(TRANS_YELLOW);
-						g.fillRect(cX + x * width, cY + y * width, width, width);
-					}
-					if (x == current.x && y == current.y) {
-						g.setColor(TRANS_BLUE);
-						g.fillRect(cX + width / 4 + x * width, cY + width / 4
-								+ y * width, width / 2, width / 2);
-					}
-				}
+				g.setColor(TRANS_YELLOW);
+				g.fillRect(cX + x * width, cY + y1 * width, width, width);
 			}
+
+			g.setColor(TRANS_BLUE);
+			g.fillRect(cX + width / 4 + x1 * width,
+					cY + width / 4 + y1 * width, width / 2, width / 2);
+
 		}
 
 		if (showExtra) {
@@ -194,11 +197,6 @@ public class MazeComponent extends JComponent implements AlgorithmComponent {
 		g.setColor(TRANS_RED);
 		g.drawString(c.x + "," + c.y, sTxt, sTyt);
 	}
-
-	private static final Color TRANS_RED = new Color(255, 0, 56, 240),
-			TRANS_WHITE = new Color(255, 255, 255, 100),
-			TRANS_BLACK = new Color(255, 255, 255, 240),
-			TRANS_YELLOW = new Color(255, 255, 153, 150), TRANS_BLUE = new Color(17, 80, 147,150);
 
 	/**
 	 * Sets the values to be painted.

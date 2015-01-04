@@ -25,8 +25,7 @@ public class MazeThread implements AlgorithmExecutor {
 
 	public void setGenerator(AbstractMazeGenerator generator) {
 		this.generator = generator;
-		reset();
-
+		this.maze = new Maze(generator.maze).maze;
 	}
 
 	@Override
@@ -36,9 +35,7 @@ public class MazeThread implements AlgorithmExecutor {
 
 	@Override
 	public void reset() {
-		System.out.println("Resetting the maze...");
 		generator.init();
-		this.maze = new Maze(generator.maze).maze;
 	}
 
 	@Override
@@ -85,7 +82,9 @@ public class MazeThread implements AlgorithmExecutor {
 			DivisionMaze.Settings temp = new DivisionMaze.Settings(0, 0,
 					generator.size_row - 1, generator.size_col - 1);
 			panel.setValues(new CellValues(new Maze(generator.maze).maze, temp));
-		}
+		} else
+			panel.setValues(new CellValues(new Maze(generator.maze).maze, null,
+					null));
 	}
 
 	@Override

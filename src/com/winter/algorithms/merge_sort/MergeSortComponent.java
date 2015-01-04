@@ -7,14 +7,12 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.JComponent;
 
 import com.winter.algorithms.core.AlgorithmComponent;
-import com.winter.algorithms.merge_sort.SorterThread.Values;
-
-
+import com.winter.algorithms.merge_sort.MergeSortExecutor.Values;
 
 /**
  * This component draws an array and marks two elements in the array.
  */
-public class ArrayComponent extends JComponent implements AlgorithmComponent {
+public class MergeSortComponent extends JComponent implements AlgorithmComponent {
 
 	/**
 	 * 
@@ -60,7 +58,6 @@ public class ArrayComponent extends JComponent implements AlgorithmComponent {
 
 	@Override
 	public void init() {
-		// TODO Auto-generated method stub
-		
+		// Not necessary here.
 	}
 }
