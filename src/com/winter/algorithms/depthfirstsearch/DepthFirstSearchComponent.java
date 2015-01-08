@@ -2,6 +2,7 @@ package com.winter.algorithms.depthfirstsearch;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
@@ -17,6 +18,7 @@ public class DepthFirstSearchComponent extends JPanel implements
 	private static final long serialVersionUID = 3737988393522181136L;
 	private Node[][] nodes;
 	private Node current;
+	private ArrayList<Node> path;
 	private static final Color TRANS_RED = new Color(255, 0, 56, 240),
 			TRANS_WHITE = new Color(255, 255, 255, 100),
 			TRANS_BLACK = new Color(255, 255, 255, 240),
@@ -45,17 +47,17 @@ public class DepthFirstSearchComponent extends JPanel implements
 		int cX = getWidth() / 2 - (nodes[0].length * width) / 2;
 
 		System.out.println("Cx:" + cX);
-		for (int y = 0; y < nodes.length; y++) {
-			for (int x = 0; x < nodes.length; x++) {
+		for (int x = 0; x < nodes[0].length; x++) {
+			for (int y = 0; y < nodes.length; y++) {
 
 				g.setColor(Color.black);
-				if (!nodes[y][x].visited)
+				if (!nodes[x][y].visited)
 					continue;
-				if (nodes[y][x].val.equals('1'))
-					g.fillRect(cX + nodes[y][x].x * width, cY + nodes[y][x].y
+				if (nodes[x][y].val.equals('1'))
+					g.fillRect(cX + nodes[x][y].x * width, cY + nodes[x][y].y
 							* width, width, width);
 				else
-					g.drawRect(cX + nodes[y][x].x * width, cY + nodes[y][x].y
+					g.drawRect(cX + nodes[x][y].x * width, cY + nodes[x][y].y
 							* width, width, height);
 			}
 		}
@@ -66,28 +68,36 @@ public class DepthFirstSearchComponent extends JPanel implements
 			g.setColor(TRANS_BLUE);
 			g.fillRect(cX + width / 4 + x * width, cY + width / 4 + y * width,
 					width / 2, width / 2);
-		}
+		} else
+			System.out.println("Current == null");
+
 	}
 
 	@Override
 	public void setValues(Object vals) {
-		System.out.println("Receiving values.");
 		NodeComponent nc = (NodeComponent) vals;
 		this.nodes = nc.nodes;
+		this.current = nc.current;
 		repaint();
 	}
 
 	@Override
-	public void init() {
+	public void initializeComponent() {
 
 	}
 
 	static class NodeComponent {
 		Node[][] nodes;
 		Node current;
+		ArrayList<Node> path;
 
 		public NodeComponent(Node[][] nodes, Node current) {
 			this.nodes = nodes;
+			this.current = current;
+		}
+
+		public NodeComponent(ArrayList<Node> path, Node current) {
+			this.path = path;
 			this.current = current;
 		}
 	}

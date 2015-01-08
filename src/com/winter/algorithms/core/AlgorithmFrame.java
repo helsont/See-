@@ -32,7 +32,7 @@ public class AlgorithmFrame extends JFrame {
 	private static final int DEFAULT_FRAME_WIDTH = 700;
 	private static final int DEFAULT_FRAME_HEIGHT = 700;
 	private static final int min_DELAY = 1, max_DELAY = 500, def_DELAY = 100;
-	public static boolean PRODUCTION_MODE = false;
+	public static boolean SHOW_ERROR_DIALOGS = true;
 	/**
 	 * 
 	 */
@@ -110,10 +110,10 @@ public class AlgorithmFrame extends JFrame {
 						dashboardPanel.enableReset();
 					}
 				});
+		thread.setDelay(max_DELAY - def_DELAY + min_DELAY);
 		algorithmThread = thread;
 		stateQueue = new LinkedBlockingQueue<AlgorithmState>();
 		thread.setQueue(stateQueue);
-		thread.setDelay(def_DELAY);
 
 		setSize(width, height);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -133,7 +133,7 @@ public class AlgorithmFrame extends JFrame {
 		setVisible(true);
 		setLocationRelativeTo(null);
 
-		center.init();
+		center.initializeComponent();
 		thread.start();
 	}
 
@@ -184,6 +184,24 @@ public class AlgorithmFrame extends JFrame {
 	}
 
 	/**
+	 * Changes the current algorithm executor to the specified one.
+	 * 
+	 * @param executor
+	 *            The new algorithm.
+	 * @param onChange
+	 *            Method to perform once the change has been completed. This is
+	 *            helpful when other components must be alerted of the change or
+	 *            updated when the change occurs.
+	 * 
+	 */
+	public static void changeExecutor(AlgorithmExecutor ex,
+			OnChangeExecutor onChange) {
+		algorithmThread.changeExecutor(ex);
+		dashboardPanel.setButtonsEnabledState(true);
+		onChange.onChangeExecutor();
+	}
+
+	/**
 	 * Stops the current AlgorithmExecutor from running.
 	 */
 	public static void stop() {
@@ -202,6 +220,22 @@ public class AlgorithmFrame extends JFrame {
 		return DEFAULT_FRAME_HEIGHT;
 	}
 
+	/**
+	 * Used to specify an action to perform once the AlgorithmExecutor has
+	 * changed. Let components/GUI know of the change here.
+	 * 
+	 * @author Helson Taveras hjt2113@columbia.edu
+	 * 
+	 */
+	public static interface OnChangeExecutor {
+		/**
+		 * Method to perform once the change has been completed. This is helpful
+		 * when other components must be alerted of the change or updated when
+		 * the change occurs.
+		 */
+		public void onChangeExecutor();
+	}
+
 	private class DashboardPanel extends JPanel {
 		/**
 		 * 
@@ -215,13 +249,23 @@ public class AlgorithmFrame extends JFrame {
 
 		public DashboardPanel() {
 			stepButton = new JButton("Step");
+			stepButton
+					.setToolTipText("Take one step in the execution of the algorithm.");
 			runButton = new JButton("Run");
+			runButton
+					.setToolTipText("Executes the algorithm at the speed specified "
+							+ "without stopping. Press Step at any time to stop the execution.");
 			instantButton = new JButton("Instant");
+			instantButton
+					.setToolTipText("Executes the algorithm as quickly as "
+							+ "possible, ignoring the set speed.");
 			resetButton = new JButton("Reset");
+			resetButton.setToolTipText("Resets the algorithm.");
 			stepButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
 					stateQueue.add(AlgorithmState.STEP);
-					runButton.setEnabled(true);
+					if (algorithmThread.isRunningAlgorithm())
+						runButton.setEnabled(true);
 				}
 			});
 
@@ -236,7 +280,7 @@ public class AlgorithmFrame extends JFrame {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					algorithmThread.reset();
+					algorithmThread.restart();
 					setButtonsEnabledState(true);
 				}
 			});
@@ -287,10 +331,6 @@ public class AlgorithmFrame extends JFrame {
 
 		public void enableReset() {
 			resetButton.setEnabled(true);
-		}
-
-		public void enableRun() {
-			runButton.setEnabled(true);
 		}
 	}
 }

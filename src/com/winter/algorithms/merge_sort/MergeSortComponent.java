@@ -57,7 +57,7 @@ public class MergeSortComponent extends JComponent implements AlgorithmComponent
 	}
 
 	@Override
-	public void init() {
+	public void initializeComponent() {
 		// Not necessary here.
 	}
 }

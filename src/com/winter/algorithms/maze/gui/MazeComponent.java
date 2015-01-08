@@ -48,7 +48,7 @@ public class MazeComponent extends JComponent implements AlgorithmComponent {
 
 	private int diffY = 0;
 
-	public void init() {
+	public void initializeComponent() {
 		final int y = this.getY();
 		diffY = y;
 		getParent().addMouseListener(new MouseAdapter() {

@@ -2,8 +2,6 @@ package com.winter.algorithms.core;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.swing.JOptionPane;
-
 /**
  * Ease of use class that automatically takes care of blocking the Thread when
  * the user doesn't press {@linkplain AlgorithmState#STEP AlgorithmState.STEP}
@@ -62,9 +60,8 @@ public class AlgorithmController implements Runnable {
 	 * interaction.
 	 */
 	public void run() {
-		System.out.println("Just starting a new algorithm");
 		runner.reset();
-
+		queue.clear();
 		hang = new VisualHang() {
 
 			/**
@@ -81,7 +78,6 @@ public class AlgorithmController implements Runnable {
 				try {
 					// Get the current command
 					command = queue.take();
-
 					if (command == AlgorithmState.RUN) {
 						Thread.sleep(delay);
 						if (queue.peek() != AlgorithmState.STEP)
@@ -91,7 +87,11 @@ public class AlgorithmController implements Runnable {
 						exit = true;
 						throw new AlgorithmExitException(
 								"AlgorithmState.END recieved");
-					}
+					} else
+						// If it's a AlgorithmState.STEP we need
+						// to make sure there only one thing in there
+						// at time
+						queue.clear();
 				} catch (InterruptedException ex) {
 					ex.printStackTrace();
 				} catch (IllegalMonitorStateException ex) {
@@ -113,12 +113,12 @@ public class AlgorithmController implements Runnable {
 			// AlgorithmController.stop() is invoked.
 			exit = false;
 		} catch (Throwable ex) {
-			if (AlgorithmFrame.PRODUCTION_MODE)
-				JOptionPane.showConfirmDialog(null, "An error has occured:"
-						+ ex.getLocalizedMessage(), "Oops!",
-						JOptionPane.CLOSED_OPTION);
-			else
-				ex.printStackTrace();
+			if (AlgorithmFrame.SHOW_ERROR_DIALOGS) {
+				// A pretty StackTrace for the user to see the error.
+				new StackTraceDialog(ex);
+			}
+			// We print it anyways.
+			ex.printStackTrace();
 			stop();
 		}
 		isRunning = false;

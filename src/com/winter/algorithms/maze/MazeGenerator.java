@@ -1,6 +1,5 @@
-package com.winter.algorithms.maze.gui;
+package com.winter.algorithms.maze;
 
-import com.winter.algorithms.maze.Cell;
 
 /**
  * Used to generates mazes.

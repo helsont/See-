@@ -12,6 +12,7 @@ import java.util.Calendar;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.winter.algorithms.maze.AbstractMazeGenerator;
@@ -29,10 +30,11 @@ public class ExportPanel extends JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = -8142112191243205707L;
+	private AbstractMazeGenerator generator;
 
-	public ExportPanel(final AbstractMazeGenerator generator,
+	public ExportPanel(AbstractMazeGenerator generator,
 			final MazeComponent panel) {
-
+		this.generator = generator;
 		JButton export = new JButton("Export");
 		JCheckBox showExtra = new JCheckBox("Extra");
 		add(export);
@@ -53,24 +55,24 @@ public class ExportPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				BufferedWriter writer = null;
-
+				File file = null;
 				try {
 					StringBuilder br = new StringBuilder();
-					for (int x = 0; x < generator.maze.length; x++) {
-						for (int y = 0; y < generator.maze[0].length; y++) {
-							br.append(generator.maze[y][x].value);
+					for (int x = 0; x < getGenerator().maze.length; x++) {
+						for (int y = 0; y < getGenerator().maze[0].length; y++) {
+							br.append(getGenerator().maze[y][x].value);
 						}
 						br.append("\n");
 					}
 
 					String timeLog = new SimpleDateFormat("yyyyMMdd_HHmmss")
 							.format(Calendar.getInstance().getTime());
-					File logFile = new File(generator.getType() + timeLog
+					file = new File(getGenerator().getType() + timeLog
 							+ ".txt");
 
 					// This will output the full path where the file will be
 					// written to.
-					writer = new BufferedWriter(new FileWriter(logFile));
+					writer = new BufferedWriter(new FileWriter(file));
 					writer.write(br.toString());
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -78,11 +80,23 @@ public class ExportPanel extends JPanel {
 					try {
 						// Close the writer regardless of what happens.
 						writer.close();
+						JOptionPane.showConfirmDialog(null,
+								"Exporting completed: " + file.getName(),
+								"Success", JOptionPane.CLOSED_OPTION);
+
 					} catch (Exception ex) {
-						System.out.println(ex.getLocalizedMessage());
+						ex.printStackTrace();
 					}
 				}
 			}
 		});
+	}
+
+	private AbstractMazeGenerator getGenerator() {
+		return generator;
+	}
+
+	public void setGenerator(AbstractMazeGenerator generator) {
+		this.generator = generator;
 	}
 }

@@ -38,7 +38,9 @@ public class AlgorithmThread implements Runnable {
 	 */
 	private LinkedBlockingQueue<AlgorithmState> stateQueue;
 	/**
-	 * Works as a Queue with only a head.
+	 * Works as a Queue with only a head. Read: only one object is ever is in
+	 * the Queue. Future implementations may replace this with a custom object
+	 * that blocks the thread, instead of a hefty data structure.
 	 */
 	private LinkedBlockingQueue<AlgorithmExecutor> executorQueue;
 	/**
@@ -62,7 +64,7 @@ public class AlgorithmThread implements Runnable {
 	 */
 	public AlgorithmThread(AlgorithmExecutor algorithm) {
 		current = algorithm;
-		executorQueue = new LinkedBlockingQueue<AlgorithmExecutor>();
+		executorQueue = new LinkedBlockingQueue<AlgorithmExecutor>(1);
 		executorQueue.add(current);
 	}
 
@@ -109,8 +111,9 @@ public class AlgorithmThread implements Runnable {
 					onCompletion.onComplete();
 				}
 				// Reset the flag
-				if (interrupted)
+				if (interrupted) {
 					interrupted = false;
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -136,7 +139,7 @@ public class AlgorithmThread implements Runnable {
 	 * 
 	 * @return True if it's running.
 	 */
-	public boolean isRunning() {
+	public boolean isRunningAlgorithm() {
 		return isRunningAlgorithm;
 	}
 
@@ -155,13 +158,18 @@ public class AlgorithmThread implements Runnable {
 	/**
 	 * Resets the currently running AlgorithmExecutor.
 	 */
-	public void reset() {
-		stop();
+	public void restart() {
+		// A hard reset with an interruption
+		if (isRunningAlgorithm) {
+			interrupted = true;
+		}
+		controller.stop();
 		try {
 			executorQueue.put(current);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	/**
@@ -171,8 +179,9 @@ public class AlgorithmThread implements Runnable {
 	 *            The new algorithm.
 	 */
 	public void changeExecutor(AlgorithmExecutor executor) {
-		if (isRunningAlgorithm)
+		if (isRunningAlgorithm) {
 			stop();
+		}
 		try {
 			executorQueue.put(executor);
 		} catch (InterruptedException e) {

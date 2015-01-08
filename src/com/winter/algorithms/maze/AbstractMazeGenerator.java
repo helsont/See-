@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.winter.algorithms.core.AlgorithmController.VisualHang;
 import com.winter.algorithms.maze.algorithms.DivisionMaze;
-import com.winter.algorithms.maze.gui.MazeGenerator;
 
 /**
  * A useful class to generate mazes with helping methods, such as init and
@@ -12,7 +11,7 @@ import com.winter.algorithms.maze.gui.MazeGenerator;
  * right, 1 down, like a coordinate system.
  * 
  * @see com.winter.algorithms.maze.Cell
- * @see com.winter.algorithms.maze.gui.MazeGenerator
+ * @see com.winter.algorithms.maze.MazeGenerator
  * @author Helson Taveras hjt2113@columbia.edu
  * 
  */

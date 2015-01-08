@@ -46,6 +46,6 @@ public interface AlgorithmComponent {
 	/**
 	 * Initializes the algorithm component after the JFrame has been prepared.
 	 */
-	public void init();
+	public void initializeComponent();
 
 }

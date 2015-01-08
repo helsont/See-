@@ -18,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -28,6 +29,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.winter.algorithms.core.AlgorithmFrame;
+import com.winter.algorithms.core.AlgorithmFrame.OnChangeExecutor;
 import com.winter.algorithms.maze.AbstractMazeGenerator;
 import com.winter.algorithms.maze.algorithms.DepthFirstMaze;
 import com.winter.algorithms.maze.algorithms.DivisionMaze;
@@ -47,12 +49,15 @@ public class SelectGeneratorPanel extends JPanel {
 	private AbstractMazeGenerator[] types = new AbstractMazeGenerator[] {
 			new DepthFirstMaze(3, 3), new GrowingTreeMaze(3, 3),
 			new DivisionMaze(3, 3), new HuntAndKillMaze(3, 3) };
+	private ExportPanel export;
+	private boolean sizeDifferentWarningDisplayed, sizeHugeWarningDisplayed;
 
 	public SelectGeneratorPanel(AbstractMazeGenerator maze,
-			MazeComponent panel, MazeThread thread) {
+			MazeComponent panel, MazeThread thread, ExportPanel p) {
 		this.maze = maze;
 		this.panel = panel;
 		this.thread = thread;
+		this.export = p;
 		FlowLayout layout = new FlowLayout();
 		setLayout(layout);
 		setBorder(BorderFactory.createLineBorder(Color.black));
@@ -256,10 +261,42 @@ public class SelectGeneratorPanel extends JPanel {
 			petList.setVisible(false);
 		maze.size_col = width;
 		maze.size_row = height;
+		checkSizeDifferent(width, height);
 		maze.resize(width, height);
 		thread.setGenerator(maze);
 		panel.repaint();
-		AlgorithmFrame.changeExecutor(new MazeThread(maze, panel, maze.maze));
+		AlgorithmFrame.changeExecutor(new MazeThread(maze, panel, maze.maze),
+				new OnChangeExecutor() {
+
+					@Override
+					public void onChangeExecutor() {
+						export.setGenerator(maze);
+					}
+				});
+	}
+
+	private void checkSizeDifferent(int width, int height) {
+		if (!sizeDifferentWarningDisplayed && width != height) {
+			JOptionPane
+					.showConfirmDialog(
+							null,
+							"Warning: Not all algorithms function properly \n"
+									+ "when the width of the maze does not equal the \n"
+									+ "height of the maze. Expect errors.",
+							"Warning", JOptionPane.CLOSED_OPTION);
+			sizeDifferentWarningDisplayed = true;
+		} else if (!sizeHugeWarningDisplayed && width > 150 || height > 150) {
+			JOptionPane
+					.showConfirmDialog(
+							null,
+							"Warning: The program may crash due to the large maze size \n"
+									+ "specified. You can prevent a crash by running the\n"
+									+ "jar through the terminal with the command\n"
+									+ "\"java -Xss4m MazeAlgorithm[version]\"\n"
+									+ "specifying the version number without the brackets.",
+							"Warning", JOptionPane.CLOSED_OPTION);
+			sizeHugeWarningDisplayed = true;
+		}
 	}
 
 	private void createMaze(int i, Parameters p) {
@@ -270,12 +307,21 @@ public class SelectGeneratorPanel extends JPanel {
 		((GrowingTreeMaze) maze).setParameter(p);
 		thread.setGenerator(maze);
 		panel.repaint();
-		AlgorithmFrame.changeExecutor(new MazeThread(maze, panel, maze.maze));
+		AlgorithmFrame.changeExecutor(new MazeThread(maze, panel, maze.maze),
+				new OnChangeExecutor() {
+
+					@Override
+					public void onChangeExecutor() {
+						export.setGenerator(maze);
+					}
+				});
 	}
 
 	private JComboBox<Parameters> petList;
 
 	private void createDropDown() {
+		if (petList != null)
+			return;
 		Parameters[] params = GrowingTreeMaze.Parameters.values();
 		// Create the combo box, select item at index 4.
 		// Indices start at 0, so 4 specifies the pig.
@@ -291,7 +337,7 @@ public class SelectGeneratorPanel extends JPanel {
 		});
 		add(petList);
 
-		petList.setPreferredSize(new Dimension(120, 300));
+		petList.setPreferredSize(new Dimension(120, 30));
 		validate();
 	}
 

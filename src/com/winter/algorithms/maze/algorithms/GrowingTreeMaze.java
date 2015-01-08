@@ -1,5 +1,7 @@
 package com.winter.algorithms.maze.algorithms;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import com.winter.algorithms.maze.AbstractMazeGenerator;
@@ -16,6 +18,7 @@ import com.winter.algorithms.maze.Cell;
 public class GrowingTreeMaze extends AbstractMazeGenerator {
 	private LinkedList<Cell> list;
 	private Parameters parameter;
+	private ArrayList<Integer> dirs;
 
 	/**
 	 * Defines what cell will be chosen to start from once the algorithm has
@@ -50,6 +53,11 @@ public class GrowingTreeMaze extends AbstractMazeGenerator {
 		list = new LinkedList<Cell>();
 		// Get first Parameter.
 		parameter = Parameters.values()[0];
+		dirs = new ArrayList<Integer>();
+		dirs.add(0);
+		dirs.add(1);
+		dirs.add(2);
+		dirs.add(3);
 		init();
 	}
 
@@ -115,11 +123,33 @@ public class GrowingTreeMaze extends AbstractMazeGenerator {
 
 			if (neighbour_valid == -1) {
 				// backtrack
-				int[] xy = getNext();
-				x_next = xy[0];
-				y_next = xy[1];
+				Cell next = null;
+				// We can only go on if there are more elements
+				// to check.
+				while (next == null && list.size() > 0) {
+					int[] xy = getNext();
+					Cell node = maze[xy[0]][xy[1]];
+					Collections.shuffle(dirs);
+					for (int dir = 0; dir < 4; dir++) {
+						Cell c = getAdjacentPathNode(node, dirs.get(dir));
+						if (c == null)
+							continue;
+						if (!list.contains(c) && isAvailable(c.x, c.y)
+								&& withinBounds(c.x, c.y)) {
+							hang.hang(null);
+							Cell wall = getAdjacent(node, dirs.get(dir));
+							wall.value = Cell.PATH;
+							x_next = c.x;
+							y_next = c.y;
+							next = c;
+							break;
+						}
+					}
+				}
 				idx--;
 			}
+			if (list.size() == 0)
+				return;
 
 			if (neighbour_valid != -1) {
 				int randomization = neighbour_valid + 1;
@@ -145,6 +175,21 @@ public class GrowingTreeMaze extends AbstractMazeGenerator {
 
 			recurse(idx, maze, x_next, y_next, n, visited);
 		}
+	}
+
+	private boolean withinBounds(int x, int y) {
+		return x >= 1 && x <= maze.length - 2 && y >= 1
+				&& y <= maze[0].length - 2;
+	}
+
+	private boolean isAvailable(int x, int y) {
+		if ((this.maze[x - 1][y].value == WALL)
+				&& (this.maze[x][y - 1].value == WALL)
+				&& (this.maze[x][y + 1].value == WALL)
+				&& (this.maze[x + 1][y].value == WALL))
+			return true;
+
+		return false;
 	}
 
 	/**
