@@ -22,6 +22,11 @@ public class RecursiveDivide {
         System.out.println();
     }
 
+    public boolean isLessThanEqualToPrevious(int val, int idx) {
+        if(idx==0)
+            return true;
+        return val <= list.get(idx-1);
+    }
     /**
      * Divides change into quarters, dimes, and nickels. Outputs combinations as it runs.
      *
@@ -37,7 +42,7 @@ public class RecursiveDivide {
         // We can only add a quarter if there are more than 5 nickels. Also,
         // the previous coin cannot be less than the current one. (Repeats
         // checked possibilities.
-        if(nickels>=5 && QUARTER <= currency){
+        if(nickels>=5 && isLessThanEqualToPrevious(QUARTER, depth)){
             // We have at least one quarter, add it to the list.
             list.add(25);
             combinations = divide(combinations, depth+1, change-QUARTER, QUARTER);
@@ -45,14 +50,14 @@ public class RecursiveDivide {
             clear(list,depth);
         }
 
-        if(nickels>=2 && DIME <= currency ) {
+        if(nickels>=2  && isLessThanEqualToPrevious(DIME, depth)){
             // We have at least one dime.
             list.add(10);
             combinations = divide(combinations, depth +1, change-DIME, DIME);
             clear(list,depth);
         }
 
-        if(nickels>=1 && NICKEL <= currency ) {
+        if(nickels>=1 && isLessThanEqualToPrevious(NICKEL, depth)){
             // We have at least one nickel.
             list.add(5);
             combinations = divide(combinations, depth + 1, change-NICKEL, NICKEL);
@@ -81,6 +86,6 @@ public class RecursiveDivide {
     }
 
     public static void main(String[]args) {
-        new RecursiveDivide(Integer.parseInt(args[0]));
+        new RecursiveDivide(Integer.parseInt("45"));
     }
 }
