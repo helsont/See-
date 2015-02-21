@@ -1,13 +1,12 @@
 package com.winter.see.algorithms.simple;
 
-import java.awt.Graphics;
-
-import javax.swing.JPanel;
-
 import com.winter.see.core.AlgorithmComponent;
+import com.winter.see.core.AlgorithmController.VisualHang;
 import com.winter.see.core.AlgorithmExecutor;
 import com.winter.see.core.AlgorithmFrame;
-import com.winter.see.core.AlgorithmController.VisualHang;
+
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class Counter extends JPanel implements AlgorithmComponent,
@@ -57,18 +56,13 @@ public class Counter extends JPanel implements AlgorithmComponent,
 
 	@Override
 	public void setValues(Object vals) {
-
 	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		for (int i = 0; i < current; i++) {
-			g.drawString("" + current, getWidth() / 2, getHeight() / 2);
-		}
+		g.drawString("" + current, getWidth() / 2, getHeight() / 2);
 	}
 
 	@Override
-	public void initializeComponent() {
-
-	}
+	public void initializeComponent() { /* Nothing special needed*/ }
 }

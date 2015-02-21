@@ -1,5 +1,8 @@
 package com.winter.see.algorithms.maze.gui;
 
+import com.winter.see.algorithms.maze.AbstractMazeGenerator;
+
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -10,13 +13,6 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import com.winter.see.algorithms.maze.AbstractMazeGenerator;
-
 /**
  * Exports the current maze and also contains a Radio button to show extra
  * visual information of the maze.
@@ -26,9 +22,6 @@ import com.winter.see.algorithms.maze.AbstractMazeGenerator;
  */
 public class ExportPanel extends JPanel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8142112191243205707L;
 	private AbstractMazeGenerator generator;
 
