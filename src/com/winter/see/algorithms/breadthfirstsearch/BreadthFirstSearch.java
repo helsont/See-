@@ -1,6 +1,5 @@
 package com.winter.see.algorithms.breadthfirstsearch;
 
-import com.winter.see.algorithms.maze.Cell;
 import com.winter.see.core.AlgorithmController;
 
 import java.io.BufferedReader;
@@ -11,17 +10,19 @@ import java.util.Queue;
 /**
  * For an algorithms class.
  */
-public class BreadthFirstSearch implements MazeSolver {
+public class BreadthFirstSearch {
 
     public Node[][] maze;
     private Queue<Node> toVisit;
     private Node start;
     private AlgorithmController.VisualHang hang;
     private Path path;
+    private boolean noPath = true;
+    private static int LEFT = 0, UP = 1, RIGHT = 2, DOWN = 3;
+    private char[][] chars;
 
     public BreadthFirstSearch() {
         toVisit = new LinkedList<Node>();
-
     }
 
     public BreadthFirstSearch(BufferedReader br) throws IOException {
@@ -30,15 +31,17 @@ public class BreadthFirstSearch implements MazeSolver {
 
     public BreadthFirstSearch(char[][] chars) {
         this();
-        // We will access by node[row][column]
+        this.chars = chars;
+    }
+
+    public void init() {
         maze = new Node[chars.length][chars[0].length];
-//        System.out.println(Arrays.deepToString(chars));
+        // System.out.println(Arrays.deepToString(chars));
         for (int x = 0; x < chars.length; x++) {
             for (int y = 0; y < chars[0].length; y++) {
                 maze[x][y] = new Node(x, y, chars[x][y]);
                 if (maze[x][y].isStart()) {
-                    toVisit.add(start = maze[x][y]);
-                    start.visited = true;
+                    start = maze[x][y];
                 }
             }
         }
@@ -52,20 +55,24 @@ public class BreadthFirstSearch implements MazeSolver {
         this.hang = hang;
     }
 
-    private Path findPath() {
-        while (!toVisit.isEmpty()) {
-            Node curr = toVisit.poll();
-            hang.hang(new BFSData(maze, curr));
-            System.out.println(curr);
-            if (curr.isTarget()) {
-                // get the path
-                printBackwardsPath(curr);
-                return path = getPath(curr);
-            }
-            addNeighbors(curr);
-        }
-        return null;
-    }
+//    private Path findPath() {
+//        toVisit.clear();
+//        start.visited = true;
+//        start.distance = 0;
+//        toVisit.add(start);
+//        while (!toVisit.isEmpty()) {
+//            Node curr = toVisit.poll();
+//            hang.hang(new BFSData(maze, curr));
+//            if (curr.isTarget()) {
+//                // get the path
+//                noPath = false;
+//                printBackwardsPath(curr);
+//                return path = getPath(curr);
+//            }
+//            addNeighbors(curr);
+//        }
+//        return null;
+//    }
 
     private void printBackwardsPath(Node n) {
         while (n.parent != null) {
@@ -88,46 +95,51 @@ public class BreadthFirstSearch implements MazeSolver {
     }
 
     private Node getNode(int x, int y) {
-        return maze[x][y];
+        if (x >= 0 && x <= mazeWidth() - 1 && y <= mazeHeight() - 1 && y >= 0) {
+            return maze[x][y];
+        }
+        return null;
     }
 
-    private void addNeighbors(Node n) {
+    private boolean calculateDistances() {
+        int dist = 1;
+        toVisit.clear();
+        start.visited = true;
+        start.distance = 0;
+        toVisit.add(start);
+        while (!toVisit.isEmpty()) {
+            Node curr = toVisit.poll();
+            dist = curr.distance + 1;
+            hang.hang(new BFSData(maze, curr));
+            if (curr.isTarget()) {
+                noPath = false;
+                path = getPath(curr);
+            }
+            calcNeighbors(curr, dist);
+        }
+        return noPath;
+    }
+
+    private void calcNeighbors(Node n, int dist) {
         int x = n.x;
         int y = n.y;
-        if (x > 0) {
-            // Add left
-            Node left = getNode(x - 1, y);
-            if (!left.visited && !left.isWall()) {
-                toVisit.add(left);
-                left.parent = n;
-                left.visited = true;
-            }
-        }
-        if (x < mazeWidth() - 1) {
-            // Add right
-            Node right = getNode(x + 1, y);
-            if (!right.visited && !right.isWall()) {
-                toVisit.add(right);
-                right.parent = n;
-                right.visited = true;
-            }
-        }
-        if (y < mazeHeight() - 1) {
-            // Add below
-            Node down = getNode(x, y + 1);
-            if (!down.visited && !down.isWall()) {
-                toVisit.add(down);
-                down.parent = n;
-                down.visited = true;
-            }
-        }
-        if (y > 0) {
-            // Add above
-            Node up = getNode(x, y - 1);
-            if (!up.visited && !up.isWall()) {
-                toVisit.add(up);
-                up.parent = n;
-                up.visited = true;
+        Node[] dirs = new Node[4];
+        dirs[LEFT] = getNode(x - 1, y);
+        dirs[UP] = getNode(x, y - 1);
+        dirs[RIGHT] = getNode(x + 1, y);
+        dirs[DOWN] = getNode(x, y + 1);
+        for (int i = 0; i < dirs.length; i++) {
+            if (dirs[i] == null)
+                continue;
+            Node curr = dirs[i];
+            int prevDistance = curr.distance;
+            // We might have found a better way to get to this
+            // spot
+            if (!dirs[i].isWall() && ((curr.visited && dist < prevDistance) || (!curr.visited))) {
+                toVisit.add(curr);
+                curr.parent = n;
+                curr.distance = dist;
+                curr.visited = true;
             }
         }
     }
@@ -139,20 +151,26 @@ public class BreadthFirstSearch implements MazeSolver {
      * @return
      */
     public boolean calcDistances() {
-        return false;
+        return calculateDistances();
     }
 
-    @Override
-    public Path solveMaze(Cell[][] cells) {
-        return findPath();
+    public Path solveMaze() {
+        calcDistances();
+        return path;
     }
 
+    public void reset() {
+        path = null;
+        init();
+        noPath = true;
+    }
 
     public class Node {
         int x, y;
         boolean visited = false;
         char data;
         Node parent;
+        int distance = Integer.MAX_VALUE;
 
         public Node(int x, int y, char data) {
             this.x = x;
@@ -170,6 +188,10 @@ public class BreadthFirstSearch implements MazeSolver {
 
         public boolean isTarget() {
             return data == 'T';
+        }
+
+        public boolean isBlank() {
+            return !(isWall() || isStart() || isTarget());
         }
 
         @Override
@@ -190,7 +212,6 @@ public class BreadthFirstSearch implements MazeSolver {
         public BFSData(Node[][] maze, Node current) {
             this.maze = maze;
             this.current = current;
-
         }
 
         public BFSData(Node[][] maze, Path path) {

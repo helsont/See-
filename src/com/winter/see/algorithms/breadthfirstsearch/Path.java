@@ -5,7 +5,7 @@ import com.winter.see.algorithms.breadthfirstsearch.BreadthFirstSearch.Node;
 import java.util.Stack;
 
 /**
- * Created by winter on 2/20/15.
+ * Created by Helson Taveras on 2/20/15.
  */
 public class Path {
     private Node last;

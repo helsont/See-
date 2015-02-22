@@ -1,6 +1,5 @@
 package com.winter.see.algorithms.breadthfirstsearch;
 
-import com.winter.see.algorithms.maze.Cell;
 import com.winter.see.core.AlgorithmController;
 import com.winter.see.core.AlgorithmExecutor;
 
@@ -11,8 +10,6 @@ public class MazeSolverThread implements AlgorithmExecutor {
 
     private MazeComponent panel;
     private BreadthFirstSearch search;
-    private Cell[][] maze;
-    private Cell curr;
     private String filename = "maze3.data";
     private Path path;
 
@@ -34,14 +31,12 @@ public class MazeSolverThread implements AlgorithmExecutor {
 
     @Override
     public void runAlgorithm() {
-        path = search.solveMaze(maze);
-        System.out.println("Completed");
-        System.out.println(path);
+        path = search.solveMaze();
     }
 
     @Override
     public void reset() {
-        // No reset.
+        search.reset();
     }
 
     @Override
@@ -66,6 +61,6 @@ public class MazeSolverThread implements AlgorithmExecutor {
 
     @Override
     public String toString() {
-        return maze.toString();
+        return search.toString();
     }
 }
